@@ -759,6 +759,24 @@ scrcpy 5.0.1 AOA HID worked without video/audio mirroring. Over 30 key presses,
 the native app's event-to-draw interval was median 13 ms, p95 22 ms. This
 excludes USB transit, scanout and pixel response; it is not end-to-end latency.
 
+### Backlight
+
+Tested on a second PF1007L (firmware suffix `V10-1680.0.20260529`, Android 6.0.1) with root
+ADB. An app window brightness of 0 only takes the backlight down to the driver's minimum, so
+the panel stays lit. The sunxi display driver's `/sys/class/disp/disp/attr/lcdbl` turns it
+off, and touch keeps working:
+
+```sh
+adb -d shell cat /sys/class/disp/disp/attr/lcdbl                  # note the current level
+adb -d shell 'echo 0 > /sys/class/disp/disp/attr/lcdbl'           # backlight off
+adb -d shell 'echo <level> > /sys/class/disp/disp/attr/lcdbl'     # back on
+```
+
+The node is root-only again after every boot. Android does not read it back: its next
+brightness change writes the node again and turns the panel back on. An app that writes the
+node itself needs root, or a root boot script that makes the node writable. That opens the
+backlight to every app on the frame.
+
 ## Native Linux / Omarchy SD build
 
 Paolo Rosson ([`@redp314`](https://x.com/redp314)) built a separate, experimental

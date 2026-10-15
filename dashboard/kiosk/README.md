@@ -42,6 +42,11 @@ adb shell am start -a android.intent.action.MAIN -c android.intent.category.HOME
 adb shell 'grep -A2 "<preferred-activities" /data/system/users/0/package-restrictions.xml'   # check it stuck
 ```
 
+Wait until the grep shows `com.wesbos.homehq` before you reboot or unplug the frame. Android 6
+saves Home choices and the `--ez home` change to that file 10 seconds later
+([`WRITE_SETTINGS_DELAY`](https://android.googlesource.com/platform/frameworks/base/+/android-6.0.1_r81/services/core/java/com/android/server/pm/PackageManagerService.java)).
+On a PF1007L, a reboot straight after setting Home came back to the old Home.
+
 The kiosk then opens the saved URL at boot, and the Home button returns to it. If the page
 fails to load at boot because Wi-Fi isn't up yet, the kiosk keeps retrying. In the controls,
 **Open launcher** skips the kiosk and opens another Home app. To undo, pick another Home app in

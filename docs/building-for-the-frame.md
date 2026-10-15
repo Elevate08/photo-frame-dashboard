@@ -130,6 +130,18 @@ The frame runs for weeks unattended, with no keyboard and no way to press reload
 - **Boot:** Wi-Fi is not up when the page first loads, and the clock can be wrong for the first
   minute. Retry every data request with backoff. Do not show a permanent error after one
   failure.
+- **Start without the network:** the frame's WebView supports service workers and Cache Storage
+  (observed). A worker that caches the HTML, JS, CSS and fonts lets the page open before Wi-Fi
+  or your server is up. Keep the last good data in `localStorage` and show it, marked stale,
+  until the first fetch succeeds. On one unit, with the server unreachable, a reload showed
+  saved data in under a second (observed; Wi-Fi itself was not turned off). Service workers need
+  a secure origin: HTTPS with a certificate the frame trusts (see
+  [Network and HTTPS](#network-and-https)), or `http://127.0.0.1`. On plain `http://` over the
+  LAN the worker does not register, so rely on the kiosk's retry instead.
+  Cache only your own static files, never API responses. The clock can start in the past
+  after a power cut, so don't throw saved data away as too old until the clock is right. If you
+  roll back to a version without the worker, unregister it, or it keeps serving the old page
+  whenever the server is unreachable.
 - **Server restarts:** keep showing the last good data, and mark it stale ("updated 12 min
   ago"). Reconnect WebSockets/EventSource automatically.
 - **Memory:** reload the whole page once a day (for example at 3 a.m.) with
@@ -140,7 +152,9 @@ The frame runs for weeks unattended, with no keyboard and no way to press reload
   does this) and serve `index.html` with `Cache-Control: no-cache`, so a new deploy appears at
   the next reload.
 - **Screen burn-in and night:** consider a dim or dark mode at night, and small position shifts
-  for elements that never move.
+  for elements that never move. A black page still leaves the backlight on, and the page cannot
+  change it. Turning the backlight off needs root on the frame; see
+  [Backlight](allwinner-a33-pf1007l.md#backlight).
 
 ## How to test
 
